@@ -1,0 +1,25 @@
+.healthStartPage button{
+    width:100px;
+    margin:10px;
+    height:30px;
+}
+
+.startUpToolbar {
+    height: 50px;
+    border : 1px solid gray;
+    margin :10px 0px 10px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.healthStartList{
+    border : 1px solid gray;
+    height: 700px;
+    margin :10px 0px 10px 0px;
+}
+
+.startUnderToolbar{
+    display: flex;
+    justify-content: center;
+}
