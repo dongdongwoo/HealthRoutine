@@ -6,10 +6,6 @@ const restartBtnClick = () =>{
 
 }
 
-const stopHealthBtnClick = () =>{
-
-}
-
 const completeHealthBtnClick = () =>{
 
 }
@@ -17,7 +13,6 @@ const completeHealthBtnClick = () =>{
 module.exports = {
   pauseBtnClick,
   restartBtnClick,
-  stopHealthBtnClick,
   completeHealthBtnClick
 };
   
