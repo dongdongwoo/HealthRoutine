@@ -11,7 +11,7 @@
       <button disabled id="addHealthButton">+ 운동 추가</button>
       <button disabled id="deleteHealthButton">삭제</button>
     </div>
-    <div id="totalTimeDiv">
+    <div id="totalTimeDiv" style="display: none;">
       <p>전체 시간 4분 25초</p>
     </div>
   </div>
@@ -30,9 +30,9 @@
         <div id="inputDiv">
           <p>이름</p>
           <input id="healthNameInput"/>
-          <input id="healthSecondInput"/>
+          <input id="healthSecondInput" type="number" min="10" max="60"/>
           <p>초</p>
-          <input id="healthSetInput"/>
+          <input id="healthSetInput" type="number" min="1" max="10"/>
           <p>세트</p>
         </div>
         <div id="inputButtonDiv">
@@ -41,7 +41,7 @@
         </div>
       </div>
       <div id="startButtonDiv">
-        <button id="startHealthButton" >운동시작</button>
+        <button id="startHealthButton" disabled>운동시작</button>
       </div>
     </div>
   </div>

@@ -39,6 +39,25 @@ let routineConnectHealthJson = {};
 let currentSelectRoutine = "";
 let preModifyRoutineName = "";
 let preModifyHealthKey = "";
+let totalRoutineList= [];
+let totalHealthList = [];
+let healthListIndex = 0;
+let healthSetIndex = 1;
+let totalTimeCount = 0;
+let currentStartSecond = 0;
+let currentStartSet = 1;
+let useStartCount = 0;
+let startHealthInfo = {};
+let isPause = false;
+
+const initSettint = () =>{
+  healthListIndex = 0;
+  healthSetIndex=1;
+  totalTimeCount=0;
+  totalHealthList=[];
+  currentStartSecond=0;
+  currentStartSecond=1;
+}
 
 //click 이벤트를 호출하는 곳
 contentDiv.addEventListener("click",(e)=>{
@@ -66,9 +85,35 @@ contentDiv.addEventListener("click",(e)=>{
   }
 
   if(id==="startHealthButton"){//운동 시작 버튼 클릭
+    const routineListDiv = document.querySelector("#routineListDiv");
+    const healthListDiv = document.querySelector("#healthListDiv");
+
+    totalRoutineList=[];
+    for(let i=0;i<routineListDiv.children.length;i++)totalRoutineList.push(routineListDiv.children[i].children[0].textContent);
+    totalHealthList = registerModules.startHealthButton(totalHealthList);
+
+    for(let i=0;i<healthListDiv.children.length;i++){
+      const splitValue = healthListDiv.children[i].children[1].textContent.split(" ");
+      const secondPerSet = parseInt(splitValue[1].split("초")[0]);
+      const setNumber = parseInt(splitValue[2].split("세트")[0]);
+      totalTimeCount+=parseInt(secondPerSet)*parseInt(setNumber);
+      let healthInfoJson = {};
+      healthInfoJson.name = splitValue[0];
+      healthInfoJson.second = secondPerSet;
+      healthInfoJson.set = setNumber;
+
+      startHealthInfo[i] = healthInfoJson;
+    }
+    currentStartSecond = 1;
+    healthSetIndex = startHealthInfo[0].set;
     historyRouterPush("/healthStart",contentDiv);
+    startModules.initHealtStart(totalHealthList);
+    Timer();
   }else if(id==="completeHealthButton"){//운동 완료 버튼 클릭
+    isPause=false;
+    initSettint();
     historyRouterPush("/healthRegister",contentDiv);
+    registerModules.initRoutineList(totalRoutineList);
   }else if(id==="addRoutineButton"){ //루틴 생성 버튼 클릭
     isRoutineCreate = true;
     registerModules.addRoutineBtnClick();
@@ -78,21 +123,33 @@ contentDiv.addEventListener("click",(e)=>{
     registerModules.addHealthBtnClick();
   }
   else if(id==="deleteHealthButton"){//운동 삭제 버튼 클릭
-    registerModules.deleteHealthBtnClick(selectRoutineDiv);
+    routineConnectHealthJson = registerModules.deleteHealthBtnClick(currentSelectRoutine,routineConnectHealthJson);
   }
   else if(id==="saveHealthButton"){//운동 저장 버튼 클릭
-    registerModules.addHealthBtnClick();
+    if(isHealthCreate){
+      routineConnectHealthJson = registerModules.addHealthInputEvent(routineConnectHealthJson,currentSelectRoutine);
+      console.log(routineConnectHealthJson);
+      isHealthCreate = false;
+    }else if(isHealthModify){
+      routineConnectHealthJson = registerModules.modifyHealthInputEvent(preModifyHealthKey,routineConnectHealthJson,currentSelectRoutine,selectHealthDiv);
+      console.log(routineConnectHealthJson);
+      isHealthModify = false;
+    }
   }
   else if(id==="cancelHealthButton"){//운동 생성 및 수정 취소 버튼 클릭
     registerModules.cancelHealthInputEvent();
   }
   else if(id==="pauseHealthButton"){//운동 일시정지 버튼 클릭
-    startModules.pauseBtnClick();
+    isPause=true;
   }
   else if(id==="restartHealthButton"){//운동 재시작 버튼 클릭
-    startModules.restartBtnClick();
+    isPause=false;
+    Timer();
   }else if(id==="stopHealthButton"){//운동 멈추기 버튼 클릭
+    isPause=true;
+    initSettint();
     historyRouterPush("/healthRegister",contentDiv);
+    registerModules.initRoutineList(totalRoutineList);
   }
 })
 
@@ -134,8 +191,38 @@ contentDiv.addEventListener("keyup", (e) => {
 
 /* 남은시간 계산 */
 var Timer = () =>{
+  const header = document.getElementsByClassName("header");
+  const startUpToolbar = document.getElementsByClassName("startUpToolbar");
+  const compeleteButton = document.querySelector("#completeButton");
+
   var countdown = setInterval(function() {
-    
+    if(isPause)clearInterval(countdown);
+    useStartCount++;
+    header[0].children[0].textContent = `${selectRoutineDiv.children[0].textContent}: ${startHealthInfo[healthListIndex].name} ${currentStartSecond}초 / ${startHealthInfo[healthListIndex].second}초 ${currentStartSet}세트 진행 중`;
+    startUpToolbar[0].children[0].textContent = `${parseInt(useStartCount/60)}분:${parseInt(useStartCount%60)}초 / ${parseInt(totalTimeCount/60)}분:${parseInt(totalTimeCount%60)}초`
+    if (currentStartSecond < startHealthInfo[healthListIndex].second) {
+      currentStartSecond++;
+    }else{
+      if(currentStartSet === healthSetIndex){
+        if(healthListIndex===totalHealthList.length-1){
+          compeleteButton.disabled = false;
+          clearInterval(countdown);
+        }else{
+          const preStartHealthDiv = document.getElementsByClassName(`startHealthDiv_${healthListIndex}`);
+          preStartHealthDiv[0].style.backgroundColor = "white";
+          healthListIndex++;
+          const currentStartHealthDiv = document.getElementsByClassName(`startHealthDiv_${healthListIndex}`);
+          currentStartHealthDiv[0].style.backgroundColor = "gray"; 
+
+          currentStartSet=1;
+          healthSetIndex=startHealthInfo[healthListIndex].set;
+        }
+      }
+      else{
+        currentStartSet++;
+      }
+      currentStartSecond=1;
+    }
   }, 1000);
   return () => clearInterval(countdown);
 }

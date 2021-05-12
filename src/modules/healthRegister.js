@@ -1,4 +1,34 @@
 /*운동 루틴 영역*/
+const initRoutineList = (routineList) =>{
+  for(let i=0;i<routineList.length;i++){
+    const routineListDiv = document.querySelector("#routineListDiv");
+    
+    let newRoutineDiv = document.createElement("div");
+    newRoutineDiv.className = "newRoutineDiv";
+
+    let newRoutineValue = document.createElement("p");
+    newRoutineValue.textContent = routineList[i];
+    newRoutineValue.className = "newRoutineValue";
+    let newRoutineButtonDiv = document.createElement("div");
+    newRoutineButtonDiv.className = "newRoutineButtonDiv";
+
+    let newRoutineModifyButton = document.createElement("button");
+    newRoutineModifyButton.textContent = "수정";
+    newRoutineModifyButton.className = "newRoutineModifyButton";
+    let newRoutineDeleteButton = document.createElement("button");
+    newRoutineDeleteButton.textContent = "삭제";
+    newRoutineDeleteButton.className = "newRoutineDeleteButton";
+    
+    newRoutineButtonDiv.append(newRoutineModifyButton);
+    newRoutineButtonDiv.append(newRoutineDeleteButton);
+
+    newRoutineDiv.append(newRoutineValue);
+    newRoutineDiv.append(newRoutineButtonDiv);
+
+    routineListDiv.append(newRoutineDiv);
+  }
+}
+
 const addRoutineBtnClick = () => {
   const routineInput = document.querySelector("#addRoutineInput");
   routineInput.style.display = "";
@@ -54,6 +84,7 @@ const modifRoutineBtnClick = (nodeDiv) =>{
   const routineInput = document.querySelector("#addRoutineInput");
   routineInput.style.display = "";
   routineInput.value = nodeDiv.children[0].textContent;
+  return nodeDiv;
 }
 
 const modifyRoutineInputEvent = (preKey,routineJson,nodeDiv) =>{
@@ -103,8 +134,20 @@ const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
 
   const addHealthButton = document.querySelector("#addHealthButton");
   const deleteHealthButton = document.querySelector("#deleteHealthButton");
+  const startHealthButton = document.querySelector("#startHealthButton");
+  const totalTimeDiv = document.querySelector("#totalTimeDiv");
   addHealthButton.disabled = false;
   deleteHealthButton.disabled = false;
+  startHealthButton.disabled = false;
+  totalTimeDiv.style.display="";
+
+  const deleteRoutineButton = nodeDiv.getElementsByClassName("newRoutineDeleteButton");
+  deleteRoutineButton[0].disabled = true;
+  
+  if(preSelectDiv.children.length!==0){
+    const p_deleteRoutineButton = preSelectDiv.getElementsByClassName("newRoutineDeleteButton");
+    p_deleteRoutineButton[0].disabled = false;
+  }
 
   const healthListDiv = document.querySelector("#healthListDiv");
   while(healthListDiv.children.length!==0){
@@ -113,7 +156,9 @@ const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
 
   let selectRoutineHealthInfo = routineJson[nodeDiv.children[0].textContent.hashCode()];
 
+  let totalTimeCount = 0;
   Object.keys(selectRoutineHealthInfo).forEach(val=>{
+    totalTimeCount+=selectRoutineHealthInfo[val].healthSecond*selectRoutineHealthInfo[val].healthSet;
     let newHealthDiv = document.createElement("div");
     newHealthDiv.className = "newHealthDiv";
 
@@ -140,6 +185,8 @@ const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
 
     healthListDiv.append(newHealthDiv);
   })
+
+  totalTimeDiv.children[0].textContent = totalTimeCount/60<1?`전체 시간 : 0분 ${totalTimeCount}초`:`전체 시간 : ${parseInt(totalTimeCount/60)}분 ${totalTimeCount%60}초`;
 
   return nodeDiv;
 }
@@ -175,23 +222,42 @@ const modifyHealthBtnClick = (nodeDiv)=>{
   return nodeDiv;
 }
 
-const deleteHealthBtnClick = () =>{
-const isDelete = window.confirm("정말로 해당 운동 목록을 삭제하시겠습니까?");
-  if(isDelete){
-    
+const deleteHealthBtnClick = (currentRoutine,routineJson) =>{
+  const healthListDiv = document.querySelector("#healthListDiv");
+
+  while(true){
+    let isAllDelete = true;
+    for(let i=0;i<healthListDiv.children.length;i++){
+      if(healthListDiv.children[i].children[0].checked){
+        isAllDelete=false;
+        const splitValue = healthListDiv.children[i].children[1].textContent.split(" ");
+        const deleteHealthKey = splitValue[0].hashCode()+"-"+splitValue[1].split("초")[0].hashCode()+"-"+splitValue[2].split("세트")[0].hashCode();
+  
+        delete routineJson[currentRoutine][deleteHealthKey];
+        healthListDiv.removeChild(healthListDiv.children[i]);
+      }
+    }
+    if(isAllDelete)break;
   }
+
+  console.log(routineJson);
+  return routineJson;
 }
 
 const addHealthInputEvent = (routineJson,selectRoutine) =>{
   const healthInput = document.querySelector("#inputHealthDiv");
-  const healthName = document.querySelector("#healthNameInput").value;
-  const healthSecond = document.querySelector("#healthSecondInput").value;
-  const healthSet = document.querySelector("#healthSetInput").value;
+  let healthName = document.querySelector("#healthNameInput").value;
+  let healthSecond = document.querySelector("#healthSecondInput").value;
+  let healthSet = document.querySelector("#healthSetInput").value;
 
   let healthKey = healthName.hashCode()+"-"+healthSecond.hashCode()+"-"+healthSet.hashCode();
   const isAlready = routineJson[selectRoutine].hasOwnProperty(healthKey);
 
-  if(healthInfoVerify(healthName,healthSecond,healthSet)&&!isAlready){
+  const totalTimeDiv = document.querySelector("#totalTimeDiv");
+  let currentTotalTimeSplit = totalTimeDiv.children[0].textContent.split(" ");
+  let currentTotalTime = parseInt(currentTotalTimeSplit[3].split("분")[0])*60+parseInt(currentTotalTimeSplit[4].split("초")[0]);
+  if(!isAlready){
+    currentTotalTime+=healthSecond*healthSet;
     const healthListDiv = document.querySelector("#healthListDiv");
     
     let newHealthDiv = document.createElement("div");
@@ -200,6 +266,13 @@ const addHealthInputEvent = (routineJson,selectRoutine) =>{
     let newHealthCheckBox = document.createElement("input");
     newHealthCheckBox.type = "checkbox";
     newHealthCheckBox.className = "newHealthCheckBox";
+
+    if(healthName.length === 0){
+      alert("최소 한글자를 입력해주세요.");
+      return routineJson;
+    };
+    if(healthSecond < 10 || healthSecond > 60)healthSecond=30;
+    if(healthSet < 1 || healthSet > 10)healthSet=1;
 
     let newHealthValue = document.createElement("p");
     newHealthValue.textContent = healthName+" "+healthSecond+"초 "+healthSet+"세트";
@@ -226,6 +299,7 @@ const addHealthInputEvent = (routineJson,selectRoutine) =>{
 
     routineJson[selectRoutine][healthKey] = healthInfoJson;
   }
+  totalTimeDiv.children[0].textContent = currentTotalTime/60<1?`전체 시간 : 0분 ${currentTotalTime}초`:`전체 시간 : ${parseInt(currentTotalTime/60)}분 ${currentTotalTime%60}초`;
   document.querySelector("#healthNameInput").value = "";
   document.querySelector("#healthSecondInput").value = "";
   document.querySelector("#healthSetInput").value = "";
@@ -241,8 +315,17 @@ const modifyHealthInputEvent = (preKey,routineJson,currnetRoutine,nodeDiv) =>{
 
   let healthKey = healthName.hashCode()+"-"+healthSecond.hashCode()+"-"+healthSet.hashCode();
   const isAlready = routineJson[currnetRoutine].hasOwnProperty(healthKey);
+  const totalTimeDiv = document.querySelector("#totalTimeDiv");
 
-  if(healthInfoVerify(healthName,healthSecond,healthSet)&&!isAlready){
+  let currentTotalTimeSplit = totalTimeDiv.children[0].textContent.split(" ");
+  let currentTotalTime = parseInt(currentTotalTimeSplit[3].split("분")[0])*60+parseInt(currentTotalTimeSplit[4].split("초")[0]);
+  if(!isAlready){
+    if(healthSecond < 10 || healthSecond > 60)healthSecond=30;
+    if(healthSet < 1 || healthSet > 10)healthSet=1;
+
+    currentTotalTime-=parseInt(routineJson[currnetRoutine][preKey].healthSecond)*parseInt(routineJson[currnetRoutine][preKey].healthSet);
+    currentTotalTime+=healthSecond*healthSet;
+
     let preValue = routineJson[currnetRoutine][preKey];
     preValue.healthName = healthName;
     preValue.healthSecond = healthSecond;
@@ -255,28 +338,29 @@ const modifyHealthInputEvent = (preKey,routineJson,currnetRoutine,nodeDiv) =>{
 
     healthInput.style.display = "none";
   }
-
+  totalTimeDiv.children[0].textContent = currentTotalTime/60<1?`전체 시간 : 0분 ${currentTotalTime}초`:`전체 시간 : ${parseInt(currentTotalTime/60)}분 ${currentTotalTime%60}초`;
   return routineJson;
 }
 
 const cancelHealthInputEvent = () =>{
-  const routineInput = document.querySelector("#inputHealthDiv");
+  const healthInput = document.querySelector("#inputHealthDiv");
 
-  routineInput.style.display = "none";
+  healthInput.style.display = "none";
 }
 
-const healthInfoVerify = (name,second,set) =>{
-  const isHealthVerify = true;
+const startHealthButton = (totalHealthList) =>{
+  const healthListDiv = document.querySelector("#healthListDiv");
 
-  if(name.length === 0)return false;
-  if(second < 10 || second > 60)return false;
-  if(set < 1 || set > 10)return false;
+  for(let i=0;i<healthListDiv.children.length;i++){
+    totalHealthList.push(healthListDiv.children[i].children[1].textContent);
+  }
 
-  return isHealthVerify;
+  return totalHealthList;
 }
 
   
 module.exports = {
+  initRoutineList,
   addRoutineBtnClick,
   addRoutineInputEvent,
   cancelRoutineInputEvent,
@@ -291,6 +375,6 @@ module.exports = {
   addHealthInputEvent,
   modifyHealthInputEvent,
   cancelHealthInputEvent,
-  healthInfoVerify
+  startHealthButton
 };
   
