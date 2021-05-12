@@ -159,19 +159,23 @@ contentDiv.addEventListener("keyup", (e) => {
   if(e.keyCode===13){//엔터 key 입력시
     if(isRoutineCreate){
       routineConnectHealthJson = registerModules.addRoutineInputEvent(routineConnectHealthJson);
+      isRoutineModify = false;
       isRoutineCreate = false;
     }
     if(isRoutineModify){
       routineConnectHealthJson = registerModules.modifyRoutineInputEvent(preModifyRoutineName,routineConnectHealthJson,selectRoutineDiv);
       isRoutineModify = false;
+      isRoutineCreate = false;
     }
     if(isHealthCreate){
       routineConnectHealthJson = registerModules.addHealthInputEvent(routineConnectHealthJson,currentSelectRoutine);
       isHealthCreate = false;
+      isHealthModify = false;
     }
     if(isHealthModify){
       routineConnectHealthJson = registerModules.modifyHealthInputEvent(preModifyHealthKey,routineConnectHealthJson,currentSelectRoutine,selectHealthDiv);
       isHealthModify = false;
+      isHealthCreate = false;
     }
 
   }else if(e.keyCode === 	27){//esc key 입력시

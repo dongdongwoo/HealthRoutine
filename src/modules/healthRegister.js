@@ -110,10 +110,9 @@ const modifyRoutineInputEvent = (preKey,routineJson,nodeDiv) =>{
     delete routineJson[preKey];
 
     nodeDiv.children[0].textContent = inputValue;
-    routineInput.value = "";
-    routineInput.style.display = "none";
   }
-
+  routineInput.value = "";
+  routineInput.style.display = "none";
   return routineJson;
 }
 
@@ -369,9 +368,10 @@ const modifyHealthInputEvent = (preKey,routineJson,currnetRoutine,nodeDiv) =>{
 
     nodeDiv.children[1].textContent = healthName+" "+healthSecond+"초 "+healthSet+"세트";;
 
-    healthInput.style.display = "none";
+    
   }
   totalTimeDiv.children[0].textContent = currentTotalTime/60<1?`전체 시간 : 0분 ${currentTotalTime}초`:`전체 시간 : ${parseInt(currentTotalTime/60)}분 ${currentTotalTime%60}초`;
+  healthInput.style.display = "none";
   return routineJson;
 }
 
