@@ -37,7 +37,7 @@ const addRoutineBtnClick = () => {
 
 const addRoutineInputEvent = (routineJson) =>{
   const routineInput = document.querySelector("#addRoutineInput");
-  const inputValue = routineInput.value;
+  const inputValue = routineInput.value.trim();
   
   const isAlready = routineJson.hasOwnProperty(inputValue.hashCode());
 
@@ -66,7 +66,8 @@ const addRoutineInputEvent = (routineJson) =>{
     newRoutineDiv.append(newRoutineValue);
     newRoutineDiv.append(newRoutineButtonDiv);
 
-    routineListDiv.append(newRoutineDiv);
+    routineListDiv.insertBefore(newRoutineDiv,routineListDiv.firstChild);
+    //routineListDiv.append(newRoutineDiv);
     routineJson[inputValue.hashCode()] = {};
   }
   routineInput.value = "";
@@ -89,7 +90,7 @@ const modifRoutineBtnClick = (nodeDiv) =>{
 
 const modifyRoutineInputEvent = (preKey,routineJson,nodeDiv) =>{
   const routineInput = document.querySelector("#addRoutineInput");
-  const inputValue = routineInput.value;
+  const inputValue = routineInput.value.trim();
 
   const isAlready = routineJson.hasOwnProperty(inputValue.hashCode());
 
@@ -246,7 +247,7 @@ const deleteHealthBtnClick = (currentRoutine,routineJson) =>{
 
 const addHealthInputEvent = (routineJson,selectRoutine) =>{
   const healthInput = document.querySelector("#inputHealthDiv");
-  let healthName = document.querySelector("#healthNameInput").value;
+  let healthName = document.querySelector("#healthNameInput").value.trim();
   let healthSecond = document.querySelector("#healthSecondInput").value;
   let healthSet = document.querySelector("#healthSetInput").value;
 
@@ -309,7 +310,7 @@ const addHealthInputEvent = (routineJson,selectRoutine) =>{
 
 const modifyHealthInputEvent = (preKey,routineJson,currnetRoutine,nodeDiv) =>{
   const healthInput = document.querySelector("#inputHealthDiv");
-  let healthName = document.querySelector("#healthNameInput").value;
+  let healthName = document.querySelector("#healthNameInput").value.trim();
   let healthSecond = document.querySelector("#healthSecondInput").value;
   let healthSet = document.querySelector("#healthSetInput").value;
 
@@ -320,6 +321,10 @@ const modifyHealthInputEvent = (preKey,routineJson,currnetRoutine,nodeDiv) =>{
   let currentTotalTimeSplit = totalTimeDiv.children[0].textContent.split(" ");
   let currentTotalTime = parseInt(currentTotalTimeSplit[3].split("분")[0])*60+parseInt(currentTotalTimeSplit[4].split("초")[0]);
   if(!isAlready){
+    if(healthName.length === 0){
+      alert("최소 한글자를 입력해주세요.");
+      return routineJson;
+    };
     if(healthSecond < 10 || healthSecond > 60)healthSecond=30;
     if(healthSet < 1 || healthSet > 10)healthSet=1;
 

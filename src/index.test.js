@@ -1,6 +1,4 @@
-const { handleGameStart } = require("./modules/gameStart");
-const { handleGameEnd } = require("./modules/gameEnd");
-const { getData } = require("./modules/getData");
+const { routineNameVerify } = require("./modules/healthRegister");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const fs = require("fs");
@@ -29,17 +27,7 @@ describe('index.html', () => {
 
 })
 
-test('Data Send', () => {
-    return getData('https://my-json-server.typicode.com/kakaopay-fe/resources/words').then(data => {
-        expect(data.length).toBe(12);
-        expect(data[0].text).toBe("hello");
-    });
-})
-
 test('handleGameStart Test', () => {
-    expect(handleGameStart.name).toBe("handleGameStart");
-})
-
-test('handleGameEnd Test', () => {
-    expect(handleGameEnd.name).toBe("handleGameEnd");
+  expect(routineNameVerify("3분 운동 루틴")).toBe(true);
+  expect(routineNameVerify("")).toBe(false);
 })
