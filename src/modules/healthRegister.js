@@ -1,5 +1,9 @@
 /*운동 루틴 영역*/
+//운동 완료, 멈추기 버튼을 클릭 후 이전의 운동 등록화면을 보여주기 위한 함수
 const initRoutineList = (routineList) =>{
+  const header = document.getElementsByClassName("header");
+  header[0].children[0].textContent = "매일 운동 루틴";
+
   for(let i=0;i<routineList.length;i++){
     const routineListDiv = document.querySelector("#routineListDiv");
     
@@ -29,19 +33,21 @@ const initRoutineList = (routineList) =>{
   }
 }
 
+//운동 루틴 생성 버튼 클릭 이벤트
 const addRoutineBtnClick = () => {
   const routineInput = document.querySelector("#addRoutineInput");
   routineInput.style.display = "";
   routineInput.value = "";
 };
 
+//운동 루틴 입력 엔터 클릭시 발생 하는 이벤트 
 const addRoutineInputEvent = (routineJson) =>{
   const routineInput = document.querySelector("#addRoutineInput");
-  const inputValue = routineInput.value.trim();
+  const inputValue = routineInput.value.trim();//trim을 사용해 양쪽 공백 제거
   
-  const isAlready = routineJson.hasOwnProperty(inputValue.hashCode());
+  const isAlready = routineJson.hasOwnProperty(inputValue.hashCode());//이미 잇는 루틴를 체크하고자 함
 
-  if(routineNameVerify(inputValue)&&!isAlready){
+  if(routineNameVerify(inputValue)&&!isAlready){//생성하고자 하는 루틴의 이름이 유효한지 체크
     const routineListDiv = document.querySelector("#routineListDiv");
     
     let newRoutineDiv = document.createElement("div");
@@ -66,8 +72,7 @@ const addRoutineInputEvent = (routineJson) =>{
     newRoutineDiv.append(newRoutineValue);
     newRoutineDiv.append(newRoutineButtonDiv);
 
-    routineListDiv.insertBefore(newRoutineDiv,routineListDiv.firstChild);
-    //routineListDiv.append(newRoutineDiv);
+    routineListDiv.insertBefore(newRoutineDiv,routineListDiv.firstChild);//append가 아닌 insertBefore를 이용해 마지막에 추가한 루틴을 상단에 보여준다
     routineJson[inputValue.hashCode()] = {};
   }
   routineInput.value = "";
@@ -76,11 +81,13 @@ const addRoutineInputEvent = (routineJson) =>{
   return routineJson;
 }
 
+//입력 취소 이벤트
 const cancelRoutineInputEvent = () =>{
   const routineInput = document.querySelector("#addRoutineInput");
   routineInput.style.display = "none";
 }
 
+//루틴 수정 버튼 클릭 이벤트
 const modifRoutineBtnClick = (nodeDiv) =>{
   const routineInput = document.querySelector("#addRoutineInput");
   routineInput.style.display = "";
@@ -88,6 +95,7 @@ const modifRoutineBtnClick = (nodeDiv) =>{
   return nodeDiv;
 }
 
+//루틴 수정 입력 엔터키 클릭 이벤트
 const modifyRoutineInputEvent = (preKey,routineJson,nodeDiv) =>{
   const routineInput = document.querySelector("#addRoutineInput");
   const inputValue = routineInput.value.trim();
@@ -109,16 +117,17 @@ const modifyRoutineInputEvent = (preKey,routineJson,nodeDiv) =>{
   return routineJson;
 }
 
+//루틴 삭제 이벤트 
 const deleteRoutineBtnClick = (nodeDiv,parentDiv,routineJson) =>{
   const isDelete = window.confirm("정말로 해당 루틴을 삭제하시겠습니까?");
   if(isDelete){
     parentDiv.removeChild(nodeDiv);
-    console.log(nodeDiv.children[0].textContent.hashCode());
     delete routineJson[nodeDiv.children[0].textContent.hashCode()];
   }
   return routineJson;
 }
 
+//루틴 이름 유효한지 체크 최소 한글자는 있어야 한다.
 const routineNameVerify = (name) =>{
   let isVerify = true;
   if(name.length===0)return false;
@@ -126,11 +135,13 @@ const routineNameVerify = (name) =>{
   return isVerify;
 }
 
+//루틴을 선택했을때 발생하는 이벤트
 const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
+  //선택하면 예전꺼는 그대로 선택한 노드는 하이라이트
   if(nodeDiv===preSelectDiv)return nodeDiv;
   else{
     nodeDiv.style.backgroundColor = "gray"; 
-    preSelectDiv.style = "white";
+    preSelectDiv.style.backgroundColor = "white";
   }
 
   const addHealthButton = document.querySelector("#addHealthButton");
@@ -142,6 +153,7 @@ const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
   startHealthButton.disabled = false;
   totalTimeDiv.style.display="";
 
+  //선택된 운동 루틴이 삭제되면 운동 항목 부분도 날아가고 추가로 UI기능 요건이 없기때문에 disable처리
   const deleteRoutineButton = nodeDiv.getElementsByClassName("newRoutineDeleteButton");
   deleteRoutineButton[0].disabled = true;
   
@@ -150,6 +162,7 @@ const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
     p_deleteRoutineButton[0].disabled = false;
   }
 
+  //선택한 운동 루틴에 따른 운동 항목을 보여주어야 하기 때문에 기존의 운동 항목 제거
   const healthListDiv = document.querySelector("#healthListDiv");
   while(healthListDiv.children.length!==0){
     healthListDiv.removeChild(healthListDiv.children[0]);
@@ -157,6 +170,7 @@ const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
 
   let selectRoutineHealthInfo = routineJson[nodeDiv.children[0].textContent.hashCode()];
 
+  //선택한 운동 루틴에 등록된 운동 항목 다시 append
   let totalTimeCount = 0;
   Object.keys(selectRoutineHealthInfo).forEach(val=>{
     totalTimeCount+=selectRoutineHealthInfo[val].healthSecond*selectRoutineHealthInfo[val].healthSet;
@@ -193,6 +207,8 @@ const selectRoutineEvent = (nodeDiv,preSelectDiv,routineJson) =>{
 }
 
 /*운동 목록 영역*/
+
+//운동 추가 버튼 클릭 이벤트
 const addHealthBtnClick = ()=>{
   const routineInput = document.querySelector("#inputHealthDiv");
   const healthNameInput = document.querySelector("#healthNameInput");
@@ -206,6 +222,7 @@ const addHealthBtnClick = ()=>{
   routineInput.style.display = "";
 }
 
+//운동 수정 버튼 클릭 이벤트
 const modifyHealthBtnClick = (nodeDiv)=>{
   const routineInput = document.querySelector("#inputHealthDiv");
   routineInput.style.display = "";
@@ -223,9 +240,15 @@ const modifyHealthBtnClick = (nodeDiv)=>{
   return nodeDiv;
 }
 
+//운동 삭제 버튼 클릭 이벤트
 const deleteHealthBtnClick = (currentRoutine,routineJson) =>{
   const healthListDiv = document.querySelector("#healthListDiv");
+  const totalTimeDiv = document.querySelector("#totalTimeDiv");
+  let currentTotalTimeSplit = totalTimeDiv.children[0].textContent.split(" ");
+  let currentTotalTime = parseInt(currentTotalTimeSplit[3].split("분")[0])*60+parseInt(currentTotalTimeSplit[4].split("초")[0]);
 
+  //여러개 선택시 removeChild을 하면 for문이 종료되기 때문에 while을 이용해 checked된 노드를 찾고 해당 div에서 삭제
+  //삭제시 전체시간 역시 줄어들어야 하기 때문에 totatlTime에서 삭제하는 second*set 계산하여 빼도록 설정
   while(true){
     let isAllDelete = true;
     for(let i=0;i<healthListDiv.children.length;i++){
@@ -233,21 +256,22 @@ const deleteHealthBtnClick = (currentRoutine,routineJson) =>{
         isAllDelete=false;
         const splitValue = healthListDiv.children[i].children[1].textContent.split(" ");
         const deleteHealthKey = splitValue[0].hashCode()+"-"+splitValue[1].split("초")[0].hashCode()+"-"+splitValue[2].split("세트")[0].hashCode();
-  
+        currentTotalTime-=parseInt(splitValue[1].split("초")[0])*parseInt(splitValue[2].split("세트")[0]);
+
         delete routineJson[currentRoutine][deleteHealthKey];
         healthListDiv.removeChild(healthListDiv.children[i]);
       }
     }
     if(isAllDelete)break;
   }
-
-  console.log(routineJson);
+  totalTimeDiv.children[0].textContent = currentTotalTime/60<1?`전체 시간 : 0분 ${currentTotalTime}초`:`전체 시간 : ${parseInt(currentTotalTime/60)}분 ${currentTotalTime%60}초`;
   return routineJson;
 }
 
+//운동 항목 입력 엔터 클릭 이벤트
 const addHealthInputEvent = (routineJson,selectRoutine) =>{
   const healthInput = document.querySelector("#inputHealthDiv");
-  let healthName = document.querySelector("#healthNameInput").value.trim();
+  let healthName = document.querySelector("#healthNameInput").value.trim();//양쪽 공백제거
   let healthSecond = document.querySelector("#healthSecondInput").value;
   let healthSet = document.querySelector("#healthSetInput").value;
 
@@ -268,10 +292,12 @@ const addHealthInputEvent = (routineJson,selectRoutine) =>{
     newHealthCheckBox.type = "checkbox";
     newHealthCheckBox.className = "newHealthCheckBox";
 
+    //최소 한 글자는 필요
     if(healthName.length === 0){
       alert("최소 한글자를 입력해주세요.");
       return routineJson;
     };
+    //만약 기준치에 맞지 않다면 default 값 추가
     if(healthSecond < 10 || healthSecond > 60)healthSecond=30;
     if(healthSet < 1 || healthSet > 10)healthSet=1;
 
@@ -300,6 +326,7 @@ const addHealthInputEvent = (routineJson,selectRoutine) =>{
 
     routineJson[selectRoutine][healthKey] = healthInfoJson;
   }
+  //값이 추가될때마다 전체 운동 시간 내역 업데이트
   totalTimeDiv.children[0].textContent = currentTotalTime/60<1?`전체 시간 : 0분 ${currentTotalTime}초`:`전체 시간 : ${parseInt(currentTotalTime/60)}분 ${currentTotalTime%60}초`;
   document.querySelector("#healthNameInput").value = "";
   document.querySelector("#healthSecondInput").value = "";
@@ -308,6 +335,7 @@ const addHealthInputEvent = (routineJson,selectRoutine) =>{
   return routineJson;
 }
 
+//운동 수정 입력 엔터 클릭 이벤트 = 생성과 동일
 const modifyHealthInputEvent = (preKey,routineJson,currnetRoutine,nodeDiv) =>{
   const healthInput = document.querySelector("#inputHealthDiv");
   let healthName = document.querySelector("#healthNameInput").value.trim();
@@ -347,12 +375,14 @@ const modifyHealthInputEvent = (preKey,routineJson,currnetRoutine,nodeDiv) =>{
   return routineJson;
 }
 
+//운동 입력 취소 버튼 이벤트
 const cancelHealthInputEvent = () =>{
   const healthInput = document.querySelector("#inputHealthDiv");
 
   healthInput.style.display = "none";
 }
 
+//운동 시작 버튼 클릭 이벤트
 const startHealthButton = (totalHealthList) =>{
   const healthListDiv = document.querySelector("#healthListDiv");
 
